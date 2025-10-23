@@ -1,4 +1,4 @@
-const API_URL = 'https://guestbook-backend-8kmv.onrender.com';
+https://guestbook-backend-8kmv.onrender.com
 const ENTRIES_PER_PAGE = 5;
 
 let currentUser = null;
@@ -60,7 +60,8 @@ window.deleteEntry = async function(id) {
         });
         if (response.ok) {
             showMessage('Запись удалена', 'success');
-            loadEntries(currentView);
+            // Обновляем ОБА набора записей
+            await loadAllEntries();
         } else {
             const error = await response.json();
             showMessage(error.detail || 'Ошибка удаления', 'danger');
@@ -336,7 +337,10 @@ async function addEntry() {
         if (response.ok) {
             document.getElementById('entryText').value = '';
             document.getElementById('charCount').textContent = '0';
-            loadEntries(currentView);
+            
+            // Обновляем ОБА набора записей
+            await loadAllEntries(); // ← ключевое изменение
+            
             showMessage('Запись добавлена!', 'success');
             document.getElementById('entriesList').scrollIntoView({ behavior: 'smooth' });
         } else {
