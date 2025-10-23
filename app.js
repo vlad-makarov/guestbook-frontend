@@ -1,4 +1,4 @@
-https://guestbook-backend-8kmv.onrender.com
+const API_URL = 'https://guestbook-backend-8kmv.onrender.com';
 const ENTRIES_PER_PAGE = 5;
 
 let currentUser = null;
