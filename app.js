@@ -84,6 +84,7 @@ function getAvatarUrl(username) {
 function filterAndSortEntries(entries) {
     let filtered = entries;
     
+    // Поиск
     if (currentSearch) {
         const term = currentSearch.toLowerCase();
         filtered = entries.filter(entry => 
@@ -92,19 +93,29 @@ function filterAndSortEntries(entries) {
         );
     }
     
+    // Сортировка
     filtered.sort((a, b) => {
+        // Парсим дату из формата "23.10.2025 14:30"
+        const parseDate = (dateStr) => {
+            const [datePart, timePart] = dateStr.split(' ');
+            const [day, month, year] = datePart.split('.').map(Number);
+            const [hour, minute] = (timePart || '00:00').split(':').map(Number);
+            return new Date(year, month - 1, day, hour, minute);
+        };
+        
+        const dateA = parseDate(a.created_at);
+        const dateB = parseDate(b.created_at);
+        
         switch (currentSort) {
             case 'old':
-                return new Date(a.created_at.split('.').reverse().join('-')) - 
-                       new Date(b.created_at.split('.').reverse().join('-'));
+                return dateA - dateB; // Сначала старые
             case 'author-asc':
                 return a.author.localeCompare(b.author);
             case 'author-desc':
                 return b.author.localeCompare(a.author);
             case 'new':
             default:
-                return new Date(b.created_at.split('.').reverse().join('-')) - 
-                       new Date(a.created_at.split('.').reverse().join('-'));
+                return dateB - dateA; // Сначала новые
         }
     });
     
@@ -641,9 +652,13 @@ function generatePdfReport() {
 
     // Сортировка
     filtered.sort((a, b) => {
-        const dateA = new Date(a.created_at.split(' ')[0].split('.').reverse().join('-') + 'T' + a.created_at.split(' ')[1]);
-        const dateB = new Date(b.created_at.split(' ')[0].split('.').reverse().join('-') + 'T' + b.created_at.split(' ')[1]);
-        return dateB - dateA;
+        const parseDate = (dateStr) => {
+            const [datePart, timePart] = dateStr.split(' ');
+            const [day, month, year] = datePart.split('.').map(Number);
+            const [hour, minute] = (timePart || '00:00').split(':').map(Number);
+            return new Date(year, month - 1, day, hour, minute);
+        };
+        return parseDate(b.created_at) - parseDate(a.created_at);
     });
 
     // Создаём HTML для PDF
